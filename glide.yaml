@@ -1,0 +1,9 @@
+package: github.com/adelowo/gottle
+owners:
+- name: Lanre Adelowo
+  email: me@lanreadelowo.com
+  homepage: https://lanreadelowo.com
+
+import:
+- package: github.com/adelowo/onecache
+  version: ^2.0.0
