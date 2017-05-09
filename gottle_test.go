@@ -7,7 +7,7 @@ import (
 	"github.com/adelowo/onecache/memory"
 )
 
-var _ Throttler = &OnecacheThrottler{}
+var _ Throttler = NewOneCacheThrottler(nil)
 
 func TestOnecacheThrottler_Throttle(t *testing.T) {
 
@@ -141,9 +141,4 @@ func TestOnecacheThrottler_IsRateLimited(t *testing.T) {
 			The http request is supposed to be rate limited..
 			Expected %v. \n Got %v`, ErrClientIsRateLimited, err)
 	}
-}
-
-func TestOnecacheThrottler_NewOneCacheThrottler(t *testing.T) {
-
-	//	throttler
 }

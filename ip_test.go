@@ -7,6 +7,7 @@ import (
 )
 
 var _ IPProvider = &RealIP{}
+var _ IPProvider = &RemoteIP{}
 
 func setUp(t *testing.T) (*http.Request, func(), error) {
 
