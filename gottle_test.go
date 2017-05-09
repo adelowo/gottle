@@ -24,6 +24,8 @@ func TestOnecacheThrottler_Throttle(t *testing.T) {
 		ipProvider:   NewRealIP(),
 		keyGenerator: throttleKey,
 		store:        memory.NewInMemoryStore(time.Minute * 10),
+		maxRequests:  5,
+		interval:     time.Minute * 10,
 	}
 
 	if err := throttler.Throttle(r); err != nil {
@@ -54,6 +56,8 @@ func TestOnecacheThrottler_Throttle_multipleTimes(t *testing.T) {
 		ipProvider:   NewRealIP(),
 		keyGenerator: throttleKey,
 		store:        memory.NewInMemoryStore(time.Minute * 10),
+		maxRequests:  5,
+		interval:     time.Minute * 10,
 	}
 
 	if err := throttler.Throttle(r); err != nil {
@@ -95,4 +99,51 @@ func TestOnecacheThrottler_Throttle_multipleTimes(t *testing.T) {
       request twice.. \n
       Expected %d.. Got %d`, expectedHits, item.Hits)
 	}
+}
+
+func TestOnecacheThrottler_IsRateLimited(t *testing.T) {
+	r, teardown, err := setUp(t)
+	defer teardown()
+
+	if err != nil {
+		t.Errorf(`An error occurred while trying to set up this suite test`, err)
+	}
+
+	r.Header.Set(xForwardedFor, "123.456.789.000")
+
+	throttler := &OnecacheThrottler{
+		ipProvider:   NewRealIP(),
+		keyGenerator: throttleKey,
+		store:        memory.NewInMemoryStore(time.Minute * 10),
+		maxRequests:  2,
+		interval:     time.Second * 5,
+	}
+
+	for i := 0; i < 2; i++ { //Throttle the client twice
+		throttler.Throttle(r)
+	}
+
+	//**yarns**
+	//Mock out time ?
+	time.Sleep(time.Second * 5)
+
+	if ok := throttler.IsRateLimited(r); !ok {
+		t.Fatalf(`
+			The request is supposed to be ratelimited since it has surpassed
+			it's max requests condition(%d) in the timeframe allocated
+			to it..Expected %v.. Got %v`, throttler.maxRequests, true, ok)
+	}
+
+	//Throttling the request after it has surpassed it's throttling conditions
+	//should be a no-op and a rate limited error is returned
+	if err := throttler.Throttle(r); err != ErrClientIsRateLimited {
+		t.Fatalf(`
+			The http request is supposed to be rate limited..
+			Expected %v. \n Got %v`, ErrClientIsRateLimited, err)
+	}
+}
+
+func TestOnecacheThrottler_NewOneCacheThrottler(t *testing.T) {
+
+	//	throttler
 }
