@@ -24,6 +24,8 @@ func TestIp(t *testing.T) {
 func TestStore(t *testing.T) {
 	store := filesystem.MustNewFSStore("cache", time.Minute*15)
 
+	defer store.Flush()
+
 	throttler := NewOneCacheThrottler(Store(store))
 
 	if !reflect.DeepEqual(store, throttler.store) {
