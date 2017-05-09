@@ -38,8 +38,9 @@ type OnecacheThrottler struct {
 }
 
 type throttledItem struct {
-	ThrottledAt time.Time
-	Hits        int
+	ThrottledAt     time.Time //The first time the request was throttled
+	LastThrottledAt time.Time //The most recent throttle time, so we can diff to lockout or not
+	Hits            int
 }
 
 //Throttle throttles an HTTP request
@@ -49,7 +50,38 @@ func (t *OnecacheThrottler) Throttle(r *http.Request) error {
 
 	key := t.keyGenerator(ip)
 
-	item := &throttledItem{Hits: 0, ThrottledAt: time.Now()}
+	if ok := t.store.Has(key); ok {
+
+		buf, err := t.store.Get(key)
+
+		if err != nil {
+			return err
+		}
+
+		item := new(throttledItem)
+
+		if err := DecodeGob(buf, item); err != nil {
+			return err
+		}
+
+		item.LastThrottledAt = time.Now()
+		item.Hits = item.Hits + defaultThrottledItemIncrement
+
+		buf, err = EncodeGob(item)
+
+		if err != nil {
+			return err
+		}
+
+		if err := t.store.Set(key, buf, expirationTime); err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	item := &throttledItem{
+		Hits: 1, ThrottledAt: time.Now(), LastThrottledAt: time.Now()}
 
 	byt, err := EncodeGob(item)
 
@@ -80,4 +112,8 @@ func EncodeGob(val *throttledItem) ([]byte, error) {
 	}
 
 	return buf.Bytes(), nil
+}
+
+func DecodeGob(buf []byte, val *throttledItem) error {
+	return gob.NewDecoder(bytes.NewBuffer(buf)).Decode(val)
 }
