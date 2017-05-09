@@ -106,7 +106,7 @@ func TestOnecacheThrottler_IsRateLimited(t *testing.T) {
 	defer teardown()
 
 	if err != nil {
-		t.Errorf(`An error occurred while trying to set up this suite test`, err)
+		t.Error(err)
 	}
 
 	r.Header.Set(xForwardedFor, "123.456.789.000")
