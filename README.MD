@@ -81,5 +81,6 @@ throttler := NewOneCacheThrottler(
 
 > Do check the  other available options in the [godoc](https://godoc.org/github.com/adelowo/gottle) or the test suites
 
+
 ### License
 MIT
