@@ -47,3 +47,30 @@ func TestRealIP_IP(t *testing.T) {
 		r.Header.Del(v.Header)
 	}
 }
+
+func TestRemoteIP(t *testing.T) {
+	r, teardown, err := setUp(t)
+	defer teardown()
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	cases := []struct {
+		IP string
+	}{
+		{"111.222.333.444"},
+	}
+
+	provider := NewRemoteIP()
+
+	for _, v := range cases {
+		r.RemoteAddr = v.IP
+
+		if actual := provider.IP(r); v.IP != actual {
+			t.Fatalf(`
+				IP fetched from the RemoteAddr differ\n
+				Expected %s.. Got %s`, v.IP, actual)
+		}
+	}
+}

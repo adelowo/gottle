@@ -39,3 +39,20 @@ func (re *RealIP) IP(r *http.Request) string {
 func NewRealIP() *RealIP {
 	return &RealIP{}
 }
+
+//RemoteIP is an IPProvider that fetches the IP of the request directly
+// from the `RemoteAddr` of the Request
+//This is extremely unreliable.
+// Go sets the `RemoteAddr` to "IP:port" before your app handlers are called
+//So you must be setting it to the right value in a middleware or something
+//Do look at the RealIP implementation or consider writing your own IPProvider
+type RemoteIP struct{}
+
+func (rip *RemoteIP) IP(r *http.Request) string {
+	return r.RemoteAddr
+}
+
+//NewRemoteIP returns an instance of the RemoteIP implementation of IPProvider
+func NewRemoteIP() *RemoteIP {
+	return &RemoteIP{}
+}
