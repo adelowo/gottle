@@ -14,7 +14,7 @@ var xRealIP = http.CanonicalHeaderKey("X-Real-IP")
 type RealIP struct{}
 
 //IP returns the ip associated with the request
-// Ported from pressly/chi
+//.. Ported from pressly/chi
 func (re *RealIP) IP(r *http.Request) string {
 
 	var ip string

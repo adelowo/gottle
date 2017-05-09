@@ -1,3 +1,4 @@
+//Gottle is an HTTP ratelimiter built ontop of the onecache library.
 package gottle
 
 import (
