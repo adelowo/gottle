@@ -123,10 +123,6 @@ func TestOnecacheThrottler_IsRateLimited(t *testing.T) {
 		throttler.Throttle(r)
 	}
 
-	//**yarns**
-	//Mock out time ?
-	time.Sleep(time.Second * 3)
-
 	if ok := throttler.IsRateLimited(r); !ok {
 		t.Fatalf(`
 			The request is supposed to be ratelimited since it has surpassed
@@ -165,14 +161,60 @@ func TestOnecacheThrottler_Clear(t *testing.T) {
 		throttler.Throttle(r)
 	}
 
-	//**yarns**
-	//Mock out time ?
-	time.Sleep(time.Second * 3)
+	//We have to make sure the client has been rate limited
+	//After which we clear out the ratelimit set on the client
+	//Then check if the client has been frred of the limits
 
 	if ok := throttler.IsRateLimited(r); !ok {
 		t.Fatalf(`
 			The request is supposed to be ratelimited since it has surpassed
 			it's max requests condition(%d) in the timeframe allocated
 			to it..Expected %v.. Got %v`, throttler.maxRequests, true, ok)
+	}
+
+	if err := throttler.Clear(r); err != nil {
+		t.Fatalf(`
+			An error occurred while trying to clear the rate limit
+			off the client ... %v`, err)
+	}
+
+	//The client must have been freed of the ratelimit
+	if ok := throttler.IsRateLimited(r); ok {
+		t.Fatal(`
+			The request is not supposed to be ratelimited since the ratelimit
+			on it has been cleared`)
+	}
+}
+
+func TestOnecacheThrottler_Clear_forunthrottledrequest(t *testing.T) {
+	r, teardown, err := setUp(t)
+	defer teardown()
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	r.Header.Set(xForwardedFor, "123.456.789.000")
+
+	throttler := &OnecacheThrottler{
+		ipProvider:   NewRealIP(),
+		keyGenerator: throttleKey,
+		store:        memory.NewInMemoryStore(time.Minute * 10),
+		maxRequests:  2,
+		interval:     time.Second * 5,
+	}
+
+	if err := throttler.Clear(r); err != nil {
+		t.Fatalf(`
+			An error occurred while trying to clear the throttle off a client
+			.This isn't supposed to have occurred as clearing a ratelimit off an
+			 "un throttled" request should be a no-op ... %v`, err)
+	}
+
+	//The client must not be ratelimited
+	if ok := throttler.IsRateLimited(r); ok {
+		t.Fatal(`
+			The request is not supposed to be ratelimited since it
+			has not been throttled previously`)
 	}
 }
