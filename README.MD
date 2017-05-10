@@ -38,12 +38,20 @@ func main() {
 
     //Can also check if the current request has been rate limited
     if throttler.IsRateLimited(r) {
+      //We only want to throttle requests from other account types
+      //aside premium users
+      if isPremiumUser(r) {
+        //isPremiumUser fetches the account type from the context
+        throttler.Clear(r) //Clear the rate limit
+        someOperationUserWantsToCarryOut(r)
+        return
+      }
+
       sendFailureResponse(400, `
         You have been ratelimited.. Wait for some time before trying again`)
       return
     }
 
-    someOperationUserWantsToCarryOut(r)
   }
 
 }
