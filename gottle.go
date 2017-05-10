@@ -38,6 +38,7 @@ type IPProvider interface {
 type Throttler interface {
 	Throttle(r *http.Request) error
 	IsRateLimited(r *http.Request) bool
+	Clear(r *http.Request) error
 }
 
 //OnecacheThrottler provides an implementation of Throttler by
@@ -118,7 +119,7 @@ func (t *OnecacheThrottler) IsRateLimited(r *http.Request) bool {
 
 	//The user must have made X requests in Y timeframe
 	if item.Hits >= t.maxRequests &&
-		time.Now().Sub(item.LastThrottledAt) > t.interval {
+		time.Now().Sub(item.LastThrottledAt) <= t.interval {
 		return true
 	}
 
@@ -174,6 +175,23 @@ func (t *OnecacheThrottler) Throttle(r *http.Request) error {
 	}
 
 	if err = t.store.Set(key, byt, expirationTime); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+//Clear resets the throttle on the request
+func (t *OnecacheThrottler) Clear(r *http.Request) error {
+
+	key := t.keyGenerator(t.ipProvider.IP(r))
+
+	//It should be a no-op for requests that have not been throttled before
+	if !t.store.Has(key) {
+		return nil
+	}
+
+	if err := t.store.Delete(key); err != nil {
 		return err
 	}
 

@@ -125,7 +125,7 @@ func TestOnecacheThrottler_IsRateLimited(t *testing.T) {
 
 	//**yarns**
 	//Mock out time ?
-	time.Sleep(time.Second * 5)
+	time.Sleep(time.Second * 3)
 
 	if ok := throttler.IsRateLimited(r); !ok {
 		t.Fatalf(`
@@ -140,5 +140,39 @@ func TestOnecacheThrottler_IsRateLimited(t *testing.T) {
 		t.Fatalf(`
 			The http request is supposed to be rate limited..
 			Expected %v. \n Got %v`, ErrClientIsRateLimited, err)
+	}
+}
+
+func TestOnecacheThrottler_Clear(t *testing.T) {
+	r, teardown, err := setUp(t)
+	defer teardown()
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	r.Header.Set(xForwardedFor, "123.456.789.000")
+
+	throttler := &OnecacheThrottler{
+		ipProvider:   NewRealIP(),
+		keyGenerator: throttleKey,
+		store:        memory.NewInMemoryStore(time.Minute * 10),
+		maxRequests:  2,
+		interval:     time.Second * 5,
+	}
+
+	for i := 0; i < 2; i++ { //Throttle the client twice
+		throttler.Throttle(r)
+	}
+
+	//**yarns**
+	//Mock out time ?
+	time.Sleep(time.Second * 3)
+
+	if ok := throttler.IsRateLimited(r); !ok {
+		t.Fatalf(`
+			The request is supposed to be ratelimited since it has surpassed
+			it's max requests condition(%d) in the timeframe allocated
+			to it..Expected %v.. Got %v`, throttler.maxRequests, true, ok)
 	}
 }
