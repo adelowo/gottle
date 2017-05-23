@@ -13,9 +13,6 @@ import (
 )
 
 const (
-	//Set a long enough time for the data to expire
-	//TODO (adelowo) : make use of `time.Duration(-1)` instead ?
-	expirationTime                = time.Hour
 	defaultThrottledItemIncrement = 1
 	defaultMaxRequests            = 10
 	defaultInterval               = time.Minute * 10
@@ -158,7 +155,7 @@ func (t *OnecacheThrottler) Throttle(r *http.Request) error {
 			return err
 		}
 
-		if err := t.store.Set(key, buf, expirationTime); err != nil {
+		if err := t.store.Set(key, buf, t.interval); err != nil {
 			return err
 		}
 
@@ -174,7 +171,7 @@ func (t *OnecacheThrottler) Throttle(r *http.Request) error {
 		return err
 	}
 
-	if err = t.store.Set(key, byt, expirationTime); err != nil {
+	if err = t.store.Set(key, byt, t.interval); err != nil {
 		return err
 	}
 
