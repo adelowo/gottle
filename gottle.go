@@ -81,7 +81,6 @@ func setDefaultsForEmptyFields(throttler *OnecacheThrottler) {
 }
 
 type throttledItem struct {
-	ThrottledAt     time.Time //The first time the request was throttled
 	LastThrottledAt time.Time //The most recent throttle time, so we can diff to lockout or not
 	Hits            int
 }
@@ -163,7 +162,7 @@ func (t *OnecacheThrottler) Throttle(r *http.Request) error {
 	}
 
 	item := &throttledItem{
-		Hits: 1, ThrottledAt: time.Now(), LastThrottledAt: time.Now()}
+		Hits: 1, LastThrottledAt: time.Now()}
 
 	byt, err := EncodeGob(item)
 
