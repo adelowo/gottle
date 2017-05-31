@@ -281,3 +281,67 @@ func TestOnecacheThrottler_Attempts_forUnthrottledRequest(t *testing.T) {
 			Expected %d attempts. Got %d`, expectedNumberOfRequests, attempts)
 	}
 }
+
+func TestOnecacheThrottler_AttemptsLeft(t *testing.T) {
+	r, teardown, err := setUp(t)
+
+	defer teardown()
+
+	if err != nil {
+		t.Errorf("An error occurred ... %v", err)
+	}
+
+	r.Header.Set(xForwardedFor, "123.456.789.000")
+
+	throttler := NewOneCacheThrottler(
+		ThrottleCondition(time.Second, 10))
+
+	//Throttle the request 8 times
+	//Lockout is at 10 requests
+	for i := 0; i <= 7; i++ {
+		throttler.Throttle(r)
+	}
+
+	attemptsLeftTillLockout, err := throttler.AttemptsLeft(r)
+
+	if err != nil {
+		t.Fatalf(`An error occurred...%v`, err)
+	}
+
+	expectedNumberOfAttemptsLeft := 2
+
+	if attemptsLeftTillLockout != expectedNumberOfAttemptsLeft {
+		t.Fatalf(`Attempts do not match up. \n
+			Expected %d attempts. Got %d`, expectedNumberOfAttemptsLeft, attemptsLeftTillLockout)
+	}
+}
+
+func TestOnecacheThrottler_AttemptsLeft_errorsOut(t *testing.T) {
+	r, teardown, err := setUp(t)
+
+	defer teardown()
+
+	if err != nil {
+		t.Errorf("An error occurred ... %v", err)
+	}
+
+	r.Header.Set(xForwardedFor, "123.456.789.000")
+
+	throttler := NewOneCacheThrottler(
+		ThrottleCondition(time.Second, 10))
+
+	//We don't throttle the request here
+
+	attemptsLeftTillLockout, err := throttler.AttemptsLeft(r)
+
+	if err == nil {
+		t.Fatal(`An error is supposed to have occurred..`)
+	}
+
+	expectedNumberOfAttemptsLeft := -1
+
+	if attemptsLeftTillLockout != expectedNumberOfAttemptsLeft {
+		t.Fatalf(`Attempts do not match up. \n
+			Expected %d attempts. Got %d`, expectedNumberOfAttemptsLeft, attemptsLeftTillLockout)
+	}
+}

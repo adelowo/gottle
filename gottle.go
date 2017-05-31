@@ -40,6 +40,7 @@ type Throttler interface {
 //ThrottlerAttempts provides access to stats about the current request
 type ThrottlerAttempts interface {
 	Attempts(r *http.Request) (int, error)
+	AttemptsLeft(r *http.Request) (int, error)
 	IsRateLimited(r *http.Request) bool
 }
 
@@ -223,6 +224,17 @@ func (t *OnecacheThrottler) Attempts(r *http.Request) (int, error) {
 	}
 
 	return item.Hits, nil
+}
+
+//AttemptsLeft gets the number of attempts left before a lockout is obtained
+func (t *OnecacheThrottler) AttemptsLeft(r *http.Request) (int, error) {
+	attempts, err := t.Attempts(r)
+
+	if err != nil {
+		return -1, err
+	}
+
+	return (t.maxRequests - attempts), nil
 }
 
 //Default implementation of KeyFunc
