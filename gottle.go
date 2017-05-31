@@ -34,8 +34,13 @@ type IPProvider interface {
 //and check if an HTTP request is currently rate limited
 type Throttler interface {
 	Throttle(r *http.Request) error
-	IsRateLimited(r *http.Request) bool
 	Clear(r *http.Request) error
+}
+
+//ThrottlerAttempts provides access to stats about the current request
+type ThrottlerAttempts interface {
+	Attempts(r *http.Request) (int, error)
+	IsRateLimited(r *http.Request) bool
 }
 
 //OnecacheThrottler provides an implementation of Throttler by
@@ -192,6 +197,32 @@ func (t *OnecacheThrottler) Clear(r *http.Request) error {
 	}
 
 	return nil
+}
+
+//Attempts returns the number of times the request have been throttled
+func (t *OnecacheThrottler) Attempts(r *http.Request) (int, error) {
+
+	key := t.keyGenerator(t.ipProvider.IP(r))
+
+	if !t.store.Has(key) {
+		return -1, errors.New(`
+			gottle: Cannot get the number of attempts left as the current
+			request has not been throttled or it has previously been cleared out`)
+	}
+
+	buf, err := t.store.Get(key)
+
+	if err != nil {
+		return -1, err
+	}
+
+	item := new(throttledItem)
+
+	if err := DecodeGob(buf, item); err != nil {
+		return -1, err
+	}
+
+	return item.Hits, nil
 }
 
 //Default implementation of KeyFunc
