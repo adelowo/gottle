@@ -17,7 +17,7 @@ $ go get -u github.com/adelowo/gottle
 
 <div id="usage"></div>
 
-> Docs -> https://godoc.org/github.com/adelowo/gottle or run `godoc github.com/adelowo/gottle`
+> Docs for all available operations -> https://godoc.org/github.com/adelowo/gottle or run `godoc github.com/adelowo/gottle`
 
 
 ```go
@@ -59,7 +59,7 @@ func main() {
 
 <div id="works"> </div>
 
-This is a very simple throttler implementation (albeit it works very well). All it does is keep a record of the IP of a request and the number of times a request was recived from that IP. Once the request count has passed it's limit, a lockout is obtained
+This is a very simple throttler implementation (albeit it works very well). All it does is keep a record of the IP of a request and the number of times a request was received from that IP. Once the request count has passed it's limit, a lockout is obtained
 
 There are IPProviders, which extract out the IP from a request.. There are currently two implementations you can choose from
 
