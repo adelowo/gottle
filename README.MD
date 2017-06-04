@@ -73,7 +73,7 @@ You can also write your own IPProvider by implementing ;
 IP(r *http.Request) string
 ```
 
-You can also configure the amount of requests a client is allowed before a lockout is obtained.. By default, it is at 10 request in a timeframe of 10 minutes. To override that, you simply set an option on `NewOneCacheThrottler` like :
+You can also configure the amount of requests a client is allowed to make before a lockout is obtained.. By default, it is at 10 requests in a timeframe of 10 minutes. To override that, you simply set an option on `NewOneCacheThrottler` like :
 
 ```go
 
