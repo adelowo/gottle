@@ -7,7 +7,7 @@ import (
 	"github.com/adelowo/onecache/memory"
 )
 
-var _ Throttler = NewOneCacheThrottler(nil)
+var _ Throttler = NewOneCacheThrottler()
 
 func TestOnecacheThrottler_Throttle(t *testing.T) {
 

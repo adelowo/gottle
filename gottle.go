@@ -62,9 +62,7 @@ func NewOneCacheThrottler(opts ...Option) *OnecacheThrottler {
 		interval:    defaultInterval}
 
 	for _, opt := range opts {
-		if opt != nil {
-			opt(throttler)
-		}
+		opt(throttler)
 	}
 
 	setDefaultsForEmptyFields(throttler)

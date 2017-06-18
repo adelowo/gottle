@@ -28,7 +28,7 @@ func main() {
 
   func someHandler(w http.ResponseWriter, r *http.Request) {
 
-    var throttler = NewOneCacheThrottler(nil) //can pass in options instead of nil
+    var throttler = NewOneCacheThrottler() //can pass in options
 
     //Throttle the request
     if err := throttler.Throttle(r); err != nil {
