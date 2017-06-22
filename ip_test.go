@@ -58,9 +58,12 @@ func TestRemoteIP(t *testing.T) {
 	}
 
 	cases := []struct {
-		IP string
+		IP       string
+		Expected string
+		hasError bool
 	}{
-		{"111.222.333.444"},
+		{"111.222.333.444:1234", "111.222.333.444", false},
+		{"111.222.333.444", "", false},
 	}
 
 	provider := NewRemoteIP()
@@ -68,7 +71,7 @@ func TestRemoteIP(t *testing.T) {
 	for _, v := range cases {
 		r.RemoteAddr = v.IP
 
-		if actual := provider.IP(r); v.IP != actual {
+		if actual := provider.IP(r); v.Expected != actual {
 			t.Fatalf(`
 				IP fetched from the RemoteAddr differ\n
 				Expected %s.. Got %s`, v.IP, actual)

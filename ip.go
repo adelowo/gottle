@@ -1,6 +1,7 @@
 package gottle
 
 import (
+	"net"
 	"net/http"
 	"strings"
 )
@@ -49,7 +50,14 @@ func NewRealIP() *RealIP {
 type RemoteIP struct{}
 
 func (rip *RemoteIP) IP(r *http.Request) string {
-	return r.RemoteAddr
+
+	host, _, err := net.SplitHostPort(r.RemoteAddr)
+
+	if err != nil {
+		return ""
+	}
+
+	return host
 }
 
 //NewRemoteIP returns an instance of the RemoteIP implementation of IPProvider
