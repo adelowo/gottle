@@ -60,10 +60,9 @@ func TestRemoteIP(t *testing.T) {
 	cases := []struct {
 		IP       string
 		Expected string
-		hasError bool
 	}{
-		{"111.222.333.444:1234", "111.222.333.444", false},
-		{"111.222.333.444", "", false},
+		{"111.222.333.444:1234", "111.222.333.444"},
+		{"111.222.333.444", ""},
 	}
 
 	provider := NewRemoteIP()
