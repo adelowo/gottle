@@ -57,7 +57,7 @@ func (rip *RemoteIP) IP(r *http.Request) string {
 		return ""
 	}
 
-	return host
+	return strings.TrimSpace(host)
 }
 
 //NewRemoteIP returns an instance of the RemoteIP implementation of IPProvider
