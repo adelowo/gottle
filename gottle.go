@@ -80,7 +80,7 @@ func setDefaultsForEmptyFields(throttler *OnecacheThrottler) {
 	}
 
 	if throttler.store == nil {
-		throttler.store = memory.NewInMemoryStore(time.Minute * 20)
+		throttler.store = memory.NewInMemoryStore()
 	}
 }
 

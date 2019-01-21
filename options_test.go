@@ -22,7 +22,7 @@ func TestIp(t *testing.T) {
 }
 
 func TestStore(t *testing.T) {
-	store := filesystem.MustNewFSStore("cache", time.Minute*15)
+	store := filesystem.MustNewFSStore("cache")
 
 	defer store.Flush()
 

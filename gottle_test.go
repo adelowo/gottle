@@ -23,7 +23,7 @@ func TestOnecacheThrottler_Throttle(t *testing.T) {
 	throttler := &OnecacheThrottler{
 		ipProvider:   NewRealIP(),
 		keyGenerator: throttleKey,
-		store:        memory.NewInMemoryStore(time.Minute * 10),
+		store:        memory.New(),
 		maxRequests:  5,
 		interval:     time.Minute * 10,
 	}
@@ -55,7 +55,7 @@ func TestOnecacheThrottler_Throttle_multipleTimes(t *testing.T) {
 	throttler := &OnecacheThrottler{
 		ipProvider:   NewRealIP(),
 		keyGenerator: throttleKey,
-		store:        memory.NewInMemoryStore(time.Minute * 10),
+		store:        memory.NewInMemoryStore(),
 		maxRequests:  5,
 		interval:     time.Minute * 10,
 	}
@@ -114,7 +114,7 @@ func TestOnecacheThrottler_IsRateLimited(t *testing.T) {
 	throttler := &OnecacheThrottler{
 		ipProvider:   NewRealIP(),
 		keyGenerator: throttleKey,
-		store:        memory.NewInMemoryStore(time.Minute * 10),
+		store:        memory.NewInMemoryStore(),
 		maxRequests:  2,
 		interval:     time.Second * 5,
 	}
@@ -152,7 +152,7 @@ func TestOnecacheThrottler_Clear(t *testing.T) {
 	throttler := &OnecacheThrottler{
 		ipProvider:   NewRealIP(),
 		keyGenerator: throttleKey,
-		store:        memory.NewInMemoryStore(time.Minute * 10),
+		store:        memory.NewInMemoryStore(),
 		maxRequests:  2,
 		interval:     time.Second * 5,
 	}
@@ -199,7 +199,7 @@ func TestOnecacheThrottler_Clear_forunthrottledrequest(t *testing.T) {
 	throttler := &OnecacheThrottler{
 		ipProvider:   NewRealIP(),
 		keyGenerator: throttleKey,
-		store:        memory.NewInMemoryStore(time.Minute * 10),
+		store:        memory.NewInMemoryStore(),
 		maxRequests:  2,
 		interval:     time.Second * 5,
 	}
